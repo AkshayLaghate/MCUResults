@@ -1,10 +1,9 @@
 package com.ClassyCreations.mcuresults;
 
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,12 +11,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
+
+import com.ClassyCreations.mcuresults.Fragments.FormFragment;
 
 public class HostActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        FormFragment.OnFragmentInteractionListener {
 
-    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,15 +25,6 @@ public class HostActivity extends AppCompatActivity
         setContentView(R.layout.activity_host);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -44,20 +35,14 @@ public class HostActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                fetchResult();
-            }
-        });
-    }
-
-    private void fetchResult() {
-
-
+        if (savedInstanceState == null) {
+            navigationView.getMenu().performIdentifierAction(R.id.result, 0);
+        }
+        navigationView.setCheckedItem(R.id.result);
 
     }
+
+
 
     @Override
     public void onBackPressed() {
@@ -97,9 +82,10 @@ public class HostActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (id == R.id.result) {
+            fragmentManager.beginTransaction().add(R.id.container, new FormFragment(), "form").commit();
+        } else if (id == R.id.saved) {
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -114,5 +100,10 @@ public class HostActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

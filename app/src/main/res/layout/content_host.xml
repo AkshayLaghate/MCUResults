@@ -9,11 +9,5 @@
     tools:context="com.ClassyCreations.mcuresults.HostActivity"
     tools:showIn="@layout/app_bar_host">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button"
-        android:text="Submit"
-        android:layout_gravity="center"/>
 
 </FrameLayout>
