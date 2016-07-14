@@ -1,11 +1,13 @@
 package com.ClassyCreations.mcuresults;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -29,6 +31,8 @@ public class ResultActivity extends AppCompatActivity {
             tvSubject4, tvTheory4, tvPractical4, tvSessional4, tvTotal4;
 
     ArrayList<String> subjects, theory, practical, sessional, total;
+
+    ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +116,18 @@ public class ResultActivity extends AppCompatActivity {
     private class FetchResult extends AsyncTask<Void, Void, Void> {
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            pd = new ProgressDialog(ResultActivity.this);
+            pd.setMessage("Getting Result...");
+            pd.setCancelable(false);
+            pd.setCanceledOnTouchOutside(false);
+            pd.setIndeterminate(true);
+            pd.show();
+        }
+
+        @Override
         protected Void doInBackground(Void... params) {
 
             try {
@@ -124,38 +140,38 @@ public class ResultActivity extends AppCompatActivity {
                         .post();
 
                 final Element img = doc.getElementById("Image1");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Picasso.with(getApplicationContext()).load(img.attr("src")).into(ivDp);
+
+                if(img != null) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Picasso.with(getApplicationContext()).load(img.attr("src")).into(ivDp);
+                        }
+                    });
+
+
+                    Element names = doc.getElementById("LblName");
+                    name = names.text();
+
+                    Elements tdTot = doc.getElementsByClass("tdTot");
+
+                    marks = tdTot.get(0).text().replace("TOTAL MARKS-", "");
+                    result = tdTot.get(1).text().replace("RESULT-", "").replace("\u00a0", "");
+
+                    Element span = doc.getElementById("lblDetail");
+                    Elements trs = span.getElementsByTag("tr");
+
+                    for (int i = 1; i < (trs.size() - 1); i++) {
+                        Elements tds = trs.get(i).getElementsByTag("td");
+                        Log.d("MCU", "doInBackground: " + "Size :" + tds.size());
+                        subjects.add(tds.get(0).text());
+                        theory.add(tds.get(1).text());
+                        practical.add(tds.get(2).text());
+                        sessional.add(tds.get(3).text());
+                        total.add(tds.get(4).text() + "/" + tds.get(5).text());
                     }
-                });
 
-                Log.d("MCU", "fetchResult: " + img.attr("src"));
-                Log.d("MCU", "fetchResult: " + doc.toString());
-
-                Element names = doc.getElementById("LblName");
-                name = names.text();
-
-                Elements tdTot = doc.getElementsByClass("tdTot");
-
-                marks = tdTot.get(0).text().replace("TOTAL MARKS-", "");
-                result = tdTot.get(1).text().replace("RESULT-", "").replace("\u00a0", "");
-
-                Element span = doc.getElementById("lblDetail");
-                Elements trs = span.getElementsByTag("tr");
-
-                for (int i = 1; i < (trs.size() - 1); i++) {
-                    Elements tds = trs.get(i).getElementsByTag("td");
-                    Log.d("MCU", "doInBackground: " + "Size :" + tds.size());
-                    subjects.add(tds.get(0).text());
-                    theory.add(tds.get(1).text());
-                    practical.add(tds.get(2).text());
-                    sessional.add(tds.get(3).text());
-                    total.add(tds.get(4).text() + "/" + tds.get(5).text());
                 }
-
-                Log.d("MCU", "doInBackground: " + "Subject :" + trs.get(1).text());
 
 
             } catch (IOException e) {
@@ -168,16 +184,19 @@ public class ResultActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            tvName.setText(name);
-            tvMarks.setText(marks);
-            tvResult.setText(result);
+            pd.cancel();
 
-            if (result.contains("PASS")) {
-                tvResult.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-            }
+
+
 
 
             if (subjects.size() > 0) {
+                if (result.contains("PASS")) {
+                    tvResult.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                }
+                tvName.setText(name);
+                tvMarks.setText(marks);
+                tvResult.setText(result);
                 tvSubject1.setText(subjects.get(0));
                 tvTheory1.setText("Theory : " + theory.get(0));
                 tvPractical1.setText("Practical : " + practical.get(0));
@@ -202,6 +221,10 @@ public class ResultActivity extends AppCompatActivity {
                 tvSessional4.setText("Sessional : " + sessional.get(3));
                 tvTotal4.setText("Total : " + total.get(3));
 
+            }
+            else {
+                Toast.makeText(getApplicationContext(),"Connection Error! Try Later...",Toast.LENGTH_SHORT).show();
+                ResultActivity.this.finish();
             }
         }
     }

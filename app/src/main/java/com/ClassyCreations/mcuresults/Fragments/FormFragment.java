@@ -98,12 +98,18 @@ public class FormFragment extends Fragment {
         bSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getContext(), com.ClassyCreations.mcuresults.ResultActivity.class);
-                Bundle bag = new Bundle();
-                bag.putString("roll", etRollNo.getText().toString());
-                bag.putString("exam", examCodes[pos]);
-                i.putExtras(bag);
-                getActivity().startActivity(i);
+
+                if(!etRollNo.getText().toString().matches("")) {
+                    Intent i = new Intent(getContext(), com.ClassyCreations.mcuresults.ResultActivity.class);
+                    Bundle bag = new Bundle();
+                    bag.putString("roll", etRollNo.getText().toString());
+                    bag.putString("exam", examCodes[pos]);
+                    i.putExtras(bag);
+                    getActivity().startActivity(i);
+                }
+                else {
+                    etRollNo.setError("Can't be empty!");
+                }
             }
         });
 
